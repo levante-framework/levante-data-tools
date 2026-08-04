@@ -19,7 +19,8 @@ codesheets <- list("caregiver" = "Caregiver Forms",
 get_coding <- function(survey_sheet, survey_type) {
   read_sheet(codebook, sheet = survey_sheet, na = c("", "NA")) |>
     filter(!is.na(variable_name), !str_detect(item_text, "Instructions")) |>
-    select(variable_name, contains("construct"), question_type, contains("survey_part"),
+    select(variable_name, contains("construct"), item_text,
+           question_type, contains("survey_part"),
            reverse_coded, response_options)
 }
 survey_coding <- imap(codesheets, get_coding)
@@ -28,7 +29,8 @@ survey_coding <- imap(codesheets, get_coding)
 # https://docs.google.com/spreadsheets/d/10GGE1seZxFSjInavob8DQpTaRpB24mGw09kZ_Gs9f6g
 codebook_reduced <- "10GGE1seZxFSjInavob8DQpTaRpB24mGw09kZ_Gs9f6g"
 reduced <- read_sheet(codebook_reduced, sheet = "Sheet1", na = c("", "NA")) |>
-  select(variable_name, contains("construct"), question_type, contains("survey_part"),
+  select(variable_name, contains("construct"), item_text,
+         question_type, contains("survey_part"),
          response_options) |>
   anti_join(survey_coding$caregiver, by = "variable_name") |>
   filter_out(variable_name %in% c("ChildSCS", "ChildJukes")) # ignore totals
@@ -48,11 +50,11 @@ survey_items <- survey_coding |>
          values_str = if_else(is.na(values), "", map_chr(values, jsonlite::toJSON))) |>
   select(survey_type, variable = variable_name, variable_order,
          contains("construct"), question_type, survey_part,
-         reverse_coded, values = values_str)
+         reverse_coded, values = values_str, item_text)
 # write_csv(survey_items, "survey_items.csv", na = "")
 
 # connect to item_metadata redivis dataset, create next version if needed
-item_metadata <- redivis$organization("levante")$dataset("item_metadata:czjv")
+item_metadata <- redivis$organization("levante")$dataset("levante_metadata_items:czjv")
 item_metadata <- item_metadata$create_next_version(if_not_exists = TRUE)
 
 # connect to survey_items table, upload new survey_items df
