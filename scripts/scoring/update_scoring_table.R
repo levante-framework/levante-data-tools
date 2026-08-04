@@ -18,7 +18,8 @@ export_fields <- c(
   "subset",
   "itemtype",
   "nfact",
-  "invariance"
+  "invariance",
+  "registry_version"
 )
 
 # fetch records in corpus_item table
@@ -29,14 +30,15 @@ scoring_df <- rlang::exec(airtable, !!!scoring_table) |>
   mutate(across(where(\(v) is.list(v) & all(map_int(v, length) == 1)), as.character))
 
 scoring <- scoring_df |> unnest(datasets) |> rename(dataset = datasets) |>
-  mutate(dataset = str_replace_all(dataset, "-", "_"))
+  mutate(dataset = str_replace_all(dataset, "-", "_")) |>
+  mutate(model_set = model_set |> str_replace("site", "dataset"))
 
 # connect to item_metadata redivis dataset, create next version if needed
-registry_dataset <- redivis$organization("levante")$dataset("levante_metadata_scoring:e97h")
-registry_dataset <- registry_dataset$create_next_version(if_not_exists = TRUE)
+scoring_dataset <- redivis$organization("levante")$dataset("levante_metadata_scoring:e97h")
+scoring_dataset <- scoring_dataset$create_next_version(if_not_exists = TRUE)
 
 # connect to survey_items table, upload new survey_items df
-scoring_models_table <- registry_dataset$table("scoring_models:t416")
+scoring_models_table <- scoring_dataset$table("scoring_models:t416")
 scoring_models_table$update(upload_merge_strategy = "replace")
 scoring_models_table$upload("scoring")$create(scoring, if_not_exists = FALSE, rename_on_conflict = TRUE)
 
@@ -44,4 +46,4 @@ scoring_models_table$upload("scoring")$create(scoring, if_not_exists = FALSE, re
 # scoring_models_table$to_tibble()
 
 # release new item_metadata dataset
-scoring_dataset$release()
+# registry_dataset$release()
