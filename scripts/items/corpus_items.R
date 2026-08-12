@@ -17,7 +17,8 @@ export_fields <- c(
   "item_task",
   "group",
   "entry",
-  "chance"
+  "chance",
+  "group_label"
 )
 
 # fetch records in corpus_item table
@@ -25,10 +26,10 @@ corpus_items <- rlang::exec(airtable, !!!corpus_item_table) |>
   read_airtable(fields = export_fields) |>
   as_tibble() |>
   select(!!!export_fields) |>
-  arrange(item_uid)
+  arrange(item_uid) |>
   # linked records fields are stored as list even if containing one record
   # so need to be make into character
-  # mutate(across(where(is.list), as.character)) |>
+  mutate(across(where(is.list), as.character))
   # replace "NULL" with NA
   # mutate(across(where(is.character), \(s) na_if(s, "NULL"))) |>
   # mutate(chance = as.numeric(chance))
