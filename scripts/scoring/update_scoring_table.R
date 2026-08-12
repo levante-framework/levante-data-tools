@@ -31,7 +31,8 @@ scoring_df <- rlang::exec(airtable, !!!scoring_table) |>
 
 scoring <- scoring_df |> unnest(datasets) |> rename(dataset = datasets) |>
   mutate(dataset = str_replace_all(dataset, "-", "_")) |>
-  mutate(model_set = model_set |> str_replace("site", "dataset"))
+  arrange(item_task, dataset) |>
+  select(-registry_version) # not properly used for now
 
 # connect to item_metadata redivis dataset, create next version if needed
 scoring_dataset <- redivis$organization("levante")$dataset("levante_metadata_scoring:e97h")
