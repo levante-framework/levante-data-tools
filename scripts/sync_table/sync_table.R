@@ -8,30 +8,36 @@
 
 library(glue)
 library(here)
+library(purrr)
+suppressPackageStartupMessages(library(dplyr))
 source(here("scripts/utils/airtable.R"))
 
 # read source airtable table and replace content of target redivis table
-sync_airtable_to_redivis <- \(name, src_base, src_table, export_fields,
-                              target_dataset, target_table, sort_field = NULL,
+sync_airtable_to_redivis <- \(name, src_base, src_table, src_view = NULL, export_fields,
+                              target_dataset, target_table, fields_sort = NULL,
                               fields_unnest = NULL, fields_jsonify = NULL,
                               release = FALSE) {
   
   # fetch records in source airtable table
   message(glue("Fetching records from table <{src_table}> in Airtable base <{src_base}>"))
-  records <- fetch_airtable(src_base, src_table, export_fields)
+  records <- fetch_airtable(src_base, src_table, src_view, export_fields)
   
   # unnest by each field specified
-  if (!is.null(fields_unnest)) records <- purrr::reduce(fields_unnest, tidyr::unnest, .init = records)
+  if (!is.null(fields_unnest)) records <- reduce(fields_unnest, tidyr::unnest, .init = records)
   
   # jsonify each field specified
   jsonify_field <- \(df, field) {
-    df |> dplyr::mutate("{field}" := purrr::map(.data[[field]], \(tt) stringr::str_split(tt, ",") |> unlist()) |> purrr::map_chr(jsonlite::toJSON))
+    df |>
+      # turn comma-separated strings into character vectors
+      mutate("{field}" := map(.data[[field]], \(tt) stringr::str_split(tt, ",") |> unlist())) |>
+      # encode non-missing values to JSON
+      mutate("{field}" := if_else(is.na(.data[[field]]), "", map_chr(.data[[field]], jsonlite::toJSON)))
   }
-  if (!is.null(fields_jsonify)) records <- purrr::reduce(fields_jsonify, jsonify_field, .init = records)
+  if (!is.null(fields_jsonify)) records <- reduce(fields_jsonify, jsonify_field, .init = records)
 
   # sort by field specified
-  if (!is.null(sort_field)) records <- records |> dplyr::arrange(.data[[sort_field]])
-  
+  if (!is.null(fields_sort)) records <- records |> arrange(pick(all_of(fields_sort)))
+
   # connect to target redivis dataset, create next version if needed
   message(glue("Uploading data to Redivis table <{target_table}> in dataset <{target_dataset}>"))
   ds <- redivis::redivis$dataset(target_dataset)
@@ -65,12 +71,12 @@ run_table_sync <- \() {
 
   message(glue("Running Airtable to Redivis sync operation <{op_name}>"))
   operations <- yaml::read_yaml(here("scripts/sync_table/sync_tables.yaml"))
-  operation <- purrr::keep(operations, \(opt) opt$name == op_name)
+  operation <- keep(operations, \(opt) opt$name == op_name)
   
   if (length(operation) == 0) stop(glue("No operation with name <{op_name}> is specified"))
   if (length(operation) > 1) stop(glue("Multiple operations with name <{op_name}> are specified"))
   
-  opts <- purrr::list_flatten(operation)
+  opts <- list_flatten(operation)
   opts$release <- as.logical(release)
   rlang::exec(sync_airtable_to_redivis, !!!opts)
 }

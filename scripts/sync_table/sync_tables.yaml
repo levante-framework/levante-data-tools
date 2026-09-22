@@ -11,9 +11,9 @@
     - "nfact"
     - "invariance"
     # - "registry_version"
-  sort_field: item_task
   target_dataset: levante.levante_metadata_scoring:e97h
   target_table: scoring_models:t416
+  fields_sort: item_task
   fields_unnest: dataset
   
 - name: corpus_items
@@ -26,9 +26,9 @@
     - "entry"
     - "chance"
     - "group_label"
-  sort_field: item_uid
   target_dataset: levante.levante_metadata_items:czjv
   target_table: corpus_items:ezfc
+  fields_sort: item_uid
 
 - name: exclusions
   src_base: appe2p0S3xk4DL2qc # LEVANTE item banks
@@ -36,19 +36,33 @@
   export_fields:
     - "item_uid"
     - "dataset"
-  sort_field: item_uid
   target_dataset: levante.levante_metadata_items:czjv
   target_table: exclusions:0b5t
+  fields_sort: item_uid
   fields_unnest: dataset
 
-# TODO: port data from googlesheets to airtable
-# add special processing if necessary?
 - name: survey_items
   src_base: appe2p0S3xk4DL2qc # LEVANTE item banks
-  src_table: tblywW5bBdAvfgiMu # survey_items
+  src_table: tblO2XsZNduEUQ5K4 # survey_items
+  src_view: variables
   export_fields:
+    - "variable"
+    - "variable_order"
+    - "variable_order_reduced"
+    - "survey_type"
+    - "survey_part"
+    - "form_construct"
+    - "form_subconstruct"
+    - "construct_sdq"
+    - "question_type"
+    - "item_text"
+    - "response_options"
+    - "response_options_text"
+    - "reverse_coded"
   target_dataset: levante.levante_metadata_items:czjv
   target_table: survey_items
+  fields_sort: ["survey_type", "variable_order"]
+  fields_jsonify: ["response_options", "response_options_text"]
 
 - name: item_mapping_fields
   src_base: appIk9XNTZZns1F1F # LEVANTE pilot item bank
@@ -60,9 +74,9 @@
     - "item"
     - "answer"
     - "distractors"
-  sort_field: item_uid
   target_dataset: levante.levante_metadata_items:czjv
   target_table: item_mapping_fields:6v86
+  fields_sort: item_uid
 
 - name: item_mapping_id
   src_base: appIk9XNTZZns1F1F # LEVANTE pilot item bank
@@ -71,9 +85,9 @@
     - "item_uid"
     - "item_id"
     - "task_id"
-  sort_field: item_uid
   target_dataset: levante.levante_metadata_items:czjv
   target_table: item_mapping_id:tma7
+  fields_sort: item_uid
 
 - name: item_mapping_trial
   src_base: appIk9XNTZZns1F1F # LEVANTE pilot item bank
@@ -84,7 +98,7 @@
     - "group"
     - "entry"
     - "trials"
-  sort_field: item_uid
   target_dataset: levante.levante_metadata_items:czjv
   target_table: item_mapping_trial:hjas
+  fields_sort: item_uid
   fields_jsonify: trials

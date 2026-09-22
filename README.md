@@ -27,14 +27,15 @@ Redivis table. The specific set of possible sync operations is defined in
 - `name`: Key identifying operation
 - `src_base`: ID of source Airtable base
 - `src_table`: ID of source Airtable table
+- `src_view`: (optional) Name of source Airtable view
 - `export_fields`: List of fields to export
 - `target_dataset`: Qualified reference for target Redivis table
 - `target_table`: Name or reference id for target Redivis table
-- `sort_field`: (optional) Field to sort output by
-- `fields_unnest`: (optional) List of fields to unnest (e.g. fields that are
+- `fields_sort`: (optional) List of field(s) to sort output by
+- `fields_unnest`: (optional) List of field(s) to unnest (e.g. fields that are
                    multiselects in Airtable and each selection value should get
                    its own row in Redivis)
-- `fields_jsonify`: (optional) List of fields to jsonify (e.g. fields that are
+- `fields_jsonify`: (optional) List of field(s) to jsonify (e.g. fields that are
                     rollups in Airtable and should by stored as JSON in Redivis)
 
 The script includes a rudimentary command line interface -- the first argument
@@ -51,8 +52,7 @@ Rscript scripts/sync_table/sync_table.R scoring_table
 # sync each table in levante_metadata_items from Airtable
 Rscript scripts/sync_table/sync_table.R corpus_items
 Rscript scripts/sync_table/sync_table.R exclusions
-Rscript scripts/sync_table/sync_table.R survey_items_caregiver
-Rscript scripts/sync_table/sync_table.R survey_items_teacher
+Rscript scripts/sync_table/sync_table.R survey_items
 Rscript scripts/sync_table/sync_table.R item_mapping_fields
 Rscript scripts/sync_table/sync_table.R item_mapping_id
 Rscript scripts/sync_table/sync_table.R item_mapping_trials
