@@ -1,0 +1,90 @@
+- name: scoring_table
+  src_base: appIDUfcKdekzTiIJ # LEVANTE entities
+  src_table: tblvII2fRvfEtqkVR # Scoring
+  export_fields:
+    - "item_task"
+    - "task_id"
+    - "dataset"
+    - "model_set"
+    - "subset"
+    - "itemtype"
+    - "nfact"
+    - "invariance"
+    # - "registry_version"
+  sort_field: item_task
+  target_dataset: levante.levante_metadata_scoring:e97h
+  target_table: scoring_models:t416
+  fields_unnest: dataset
+  
+- name: corpus_items
+  src_base: appe2p0S3xk4DL2qc # LEVANTE item banks
+  src_table: tblAn9xtiDxCj2tpQ # item
+  export_fields:
+    - "item_uid"
+    - "item_task"
+    - "group"
+    - "entry"
+    - "chance"
+    - "group_label"
+  sort_field: item_uid
+  target_dataset: levante.levante_metadata_items:czjv
+  target_table: corpus_items:ezfc
+
+- name: exclusions
+  src_base: appe2p0S3xk4DL2qc # LEVANTE item banks
+  src_table: tblikKoQsqJx4uTtI # exclusion
+  export_fields:
+    - "item_uid"
+    - "dataset"
+  sort_field: item_uid
+  target_dataset: levante.levante_metadata_items:czjv
+  target_table: exclusions:0b5t
+  fields_unnest: dataset
+
+# TODO: port data from googlesheets to airtable
+# add special processing if necessary?
+- name: survey_items
+  src_base: appe2p0S3xk4DL2qc # LEVANTE item banks
+  src_table: tblywW5bBdAvfgiMu # survey_items
+  export_fields:
+  target_dataset: levante.levante_metadata_items:czjv
+  target_table: survey_items
+
+- name: item_mapping_fields
+  src_base: appIk9XNTZZns1F1F # LEVANTE pilot item bank
+  src_table: tblhqc4nIs6SD5G4k # pilot-item-mapping-fields
+  export_fields:
+    - "item_uid"
+    - "task_id"
+    - "corpus_trial_type"
+    - "item"
+    - "answer"
+    - "distractors"
+  sort_field: item_uid
+  target_dataset: levante.levante_metadata_items:czjv
+  target_table: item_mapping_fields:6v86
+
+- name: item_mapping_id
+  src_base: appIk9XNTZZns1F1F # LEVANTE pilot item bank
+  src_table: tblXD1p547VGYcQYY # pilot-item-mapping-id
+  export_fields:
+    - "item_uid"
+    - "item_id"
+    - "task_id"
+  sort_field: item_uid
+  target_dataset: levante.levante_metadata_items:czjv
+  target_table: item_mapping_id:tma7
+
+- name: item_mapping_trial
+  src_base: appIk9XNTZZns1F1F # LEVANTE pilot item bank
+  src_table: tbl2NkK9lGnrxgLcS # pilot-item
+  export_fields:
+    - "item_uid" 
+    - "item_task"
+    - "group"
+    - "entry"
+    - "trials"
+  sort_field: item_uid
+  target_dataset: levante.levante_metadata_items:czjv
+  target_table: item_mapping_trial:hjas
+  fields_jsonify: trials
