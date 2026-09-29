@@ -38,10 +38,13 @@ jobs:
           slack-channel: C0C30T4N5L1
           slack-text: Run sync script for Redivis variable metadata
           
-      - name: Run sync scripts
-        run:
-          - Rscript scripts/metadata/sync_metadata_processed.R
-          - Rscript scripts/metadata/sync_metadata_raw.R
+      - name: Run sync script (processed datasets)
+        run: Rscript scripts/metadata/sync_metadata_processed.R
+        env:
+          REDIVIS_API_TOKEN: ${{ secrets.REDIVIS_API_TOKEN }}
+
+      - name: Run sync script (raw datasets)
+        run: Rscript scripts/metadata/sync_metadata_raw.R
         env:
           REDIVIS_API_TOKEN: ${{ secrets.REDIVIS_API_TOKEN }}
           
