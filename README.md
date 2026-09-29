@@ -82,3 +82,16 @@ Rscript registry/update_registry_params.R
 # sync table levante_metadata_scoring.item_parameters *to* Airtable
 Rscript registry/update_corpus_params.R
 ```
+
+## Combined data
+
+Script to point the `update_levante_data_latest` Redivis workflow at the
+current version of each of its datasources and then run its `stack tables`
+notebook, which stacks the per-dataset tables into the combined
+`levante_data_latest` tables. Run nightly by
+`.github/workflows/update-data-latest.yaml`.
+
+```
+# update datasources and rebuild levante_data_latest
+Rscript scripts/processing/update_data_latest.R
+```
