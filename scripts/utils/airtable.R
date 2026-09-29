@@ -1,5 +1,5 @@
 # wrapper for rairtable::read_airtable that takes care of some formatting issues
-fetch_airtable <- \(src_base, src_table, src_view, export_fields) {
+fetch_airtable <- \(src_base, src_table, src_view = NULL, export_fields) {
   at_table <- list(base = src_base, table = src_table, view = src_view)
   
   # fetch records in source airtable table

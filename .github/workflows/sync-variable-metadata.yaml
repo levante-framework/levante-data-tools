@@ -6,11 +6,12 @@ on:
 name: Sync variable metadata from Airtable to Redivis datasets
 
 permissions:
-  actions: write
+  contents: read
 
 jobs:
   sync-metadata:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -18,39 +19,50 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install r-base-dev libcurl4-openssl-dev libudunits2-dev libgdal-dev
+          sudo apt-get install -y libcurl4-openssl-dev libudunits2-dev libgdal-dev
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: '4.5.3'
+          use-public-rspm: true
 
       - name: Set up renv
         uses: r-lib/actions/setup-renv@v2
 
       - name: Send start message to Slack
-        uses: archive/github-actions-slack@master
+        uses: archive/github-actions-slack@v3.1.0
         id: send-message
-
         with:
           slack-function: send-message
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: C0C30T4N5L1
           slack-text: Run sync script for Redivis variable metadata
-          
+
       - name: Run sync script (processed datasets)
         run: Rscript scripts/metadata/sync_metadata_processed.R
         env:
           REDIVIS_API_TOKEN: ${{ secrets.REDIVIS_API_TOKEN }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
 
+      # run even if the processed sync failed, so one failure doesn't skip the other
       - name: Run sync script (raw datasets)
+        if: always()
         run: Rscript scripts/metadata/sync_metadata_raw.R
         env:
           REDIVIS_API_TOKEN: ${{ secrets.REDIVIS_API_TOKEN }}
-          
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+
+      # a script that dies before its first log write leaves no file, which the upload step
+      # treats as a hard error, so make sure both paths exist
+      - name: Ensure log files exist
+        if: always()
+        run: touch sync_metadata_processed.log sync_metadata_raw.log
+
       - name: Upload log file to slack (processed datasets)
-        uses: archive/github-actions-slack@v2.0.0
-        id: upload-file
+        if: always()
+        uses: archive/github-actions-slack@v3.1.0
+        id: upload-file-processed
         with:
           slack-function: upload-file
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
@@ -58,11 +70,11 @@ jobs:
           slack-upload-file-path: sync_metadata_processed.log
           slack-upload-file-title: Sync metadata log (processed datasets)
           slack-upload-initial-comment: Here is the log file from running metadata sync.
-          slack-optional-icon_emoji: ":fire:"
-          
+
       - name: Upload log file to slack (raw datasets)
-        uses: archive/github-actions-slack@v2.0.0
-        id: upload-file
+        if: always()
+        uses: archive/github-actions-slack@v3.1.0
+        id: upload-file-raw
         with:
           slack-function: upload-file
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
@@ -70,8 +82,12 @@ jobs:
           slack-upload-file-path: sync_metadata_raw.log
           slack-upload-file-title: Sync metadata log (raw datasets)
           slack-upload-initial-comment: Here is the log file from running metadata sync.
-          slack-optional-icon_emoji: ":fire:"
-          
-      - name: Result from "Upload File"
-        run: echo "${{ steps.upload-file.outputs.slack-result }}"
-        
+
+      - name: Send failure message to Slack
+        if: failure()
+        uses: archive/github-actions-slack@v3.1.0
+        with:
+          slack-function: send-message
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          slack-channel: C0C30T4N5L1
+          slack-text: ":x: Redivis variable metadata sync failed - ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

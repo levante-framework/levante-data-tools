@@ -1,4 +1,4 @@
-source(here("scripts/metadata/sync_metadata.R"))
+source(here::here("scripts/metadata/sync_metadata.R"))
 
 run_md_sync <- \() {
   # fetch data from raw variables table

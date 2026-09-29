@@ -1,4 +1,4 @@
-source(here("scripts/metadata/sync_metadata.R"))
+source(here::here("scripts/metadata/sync_metadata.R"))
 
 run_md_sync <- \() {
   # fetch data from processed variables table
@@ -10,7 +10,7 @@ run_md_sync <- \() {
   
   # flush log file
   log_file <- "sync_metadata_processed.log"
-  file.remove(log_file)
+  if (file.exists(log_file)) file.remove(log_file)
   
   # sync metadata to each processed dataset
   walk(ds_proc, \(ds) sync_dataset(ds, md_proc, log_file))
