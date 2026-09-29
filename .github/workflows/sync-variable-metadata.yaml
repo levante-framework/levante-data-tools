@@ -23,7 +23,7 @@ jobs:
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
         with:
-          r-version: '4.5.1'
+          r-version: '4.5.3'
 
       - name: Set up renv
         uses: r-lib/actions/setup-renv@v2
@@ -38,21 +38,35 @@ jobs:
           slack-channel: C0C30T4N5L1
           slack-text: Run sync script for Redivis variable metadata
           
-      - name: Run sync script
-        run: Rscript scripts/metadata/sync_metadata.R
+      - name: Run sync scripts
+        run:
+          - Rscript scripts/metadata/sync_metadata_processed.R
+          - Rscript scripts/metadata/sync_metadata_raw.R
         env:
           REDIVIS_API_TOKEN: ${{ secrets.REDIVIS_API_TOKEN }}
           
-      - name: Upload log file to slack
+      - name: Upload log file to slack (processed datasets)
         uses: archive/github-actions-slack@v2.0.0
         id: upload-file
         with:
           slack-function: upload-file
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: C0C30T4N5L1
-          slack-upload-file-path: sync_metadata.log
-          slack-upload-file-title: Sync metadata log
-          slack-upload-initial-comment: Here is the log file from running the script.
+          slack-upload-file-path: sync_metadata_processed.log
+          slack-upload-file-title: Sync metadata log (processed datasets)
+          slack-upload-initial-comment: Here is the log file from running metadata sync.
+          slack-optional-icon_emoji: ":fire:"
+          
+      - name: Upload log file to slack (raw datasets)
+        uses: archive/github-actions-slack@v2.0.0
+        id: upload-file
+        with:
+          slack-function: upload-file
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          slack-channel: C0C30T4N5L1
+          slack-upload-file-path: sync_metadata_raw.log
+          slack-upload-file-title: Sync metadata log (raw datasets)
+          slack-upload-initial-comment: Here is the log file from running metadata sync.
           slack-optional-icon_emoji: ":fire:"
           
       - name: Result from "Upload File"
