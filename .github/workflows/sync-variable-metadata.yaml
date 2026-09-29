@@ -59,8 +59,10 @@ jobs:
         if: always()
         run: touch sync_metadata_processed.log sync_metadata_raw.log
 
+      # a Slack delivery problem should not be reported as a sync failure
       - name: Upload log file to slack (processed datasets)
         if: always()
+        continue-on-error: true
         uses: archive/github-actions-slack@v3.1.0
         id: upload-file-processed
         with:
@@ -71,8 +73,10 @@ jobs:
           slack-upload-file-title: Sync metadata log (processed datasets)
           slack-upload-initial-comment: Here is the log file from running metadata sync.
 
+      # a Slack delivery problem should not be reported as a sync failure
       - name: Upload log file to slack (raw datasets)
         if: always()
+        continue-on-error: true
         uses: archive/github-actions-slack@v3.1.0
         id: upload-file-raw
         with:
