@@ -95,3 +95,12 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: C0C30T4N5L1
           slack-text: ":x: Redivis variable metadata sync failed - ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Send success message to Slack
+        if: success()
+        uses: archive/github-actions-slack@v3.1.0
+        with:
+          slack-function: send-message
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          slack-channel: C0C30T4N5L1
+          slack-text: ":white_check_mark: Redivis variable metadata sync completed - ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
