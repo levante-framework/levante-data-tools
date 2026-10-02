@@ -87,6 +87,12 @@ jobs:
           slack-upload-file-title: Sync metadata log (raw datasets)
           slack-upload-initial-comment: Here is the log file from running metadata sync.
 
+      # slack shares uploaded files asynchronously, so a message posted immediately
+      # after the upload call lands in the channel ahead of the files themselves
+      - name: Wait for log uploads to appear in Slack
+        if: always()
+        run: sleep 10
+
       - name: Send failure message to Slack
         if: failure()
         uses: archive/github-actions-slack@v3.1.0
@@ -95,6 +101,8 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: C0C30T4N5L1
           slack-text: ":x: Redivis variable metadata sync failed - ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          slack-optional-unfurl_links: false
+          slack-optional-unfurl_media: false
 
       - name: Send success message to Slack
         if: success()
@@ -104,3 +112,5 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: C0C30T4N5L1
           slack-text: ":white_check_mark: Redivis variable metadata sync completed - ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          slack-optional-unfurl_links: false
+          slack-optional-unfurl_media: false
