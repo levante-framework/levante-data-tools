@@ -79,6 +79,15 @@ Rscript registry/update_registry_params.R
 ```
 
 ```
+# same, but extracting the group-level parameters (the latent mean and
+# variance of each group) from the multigroup models and updating table
+# levante_metadata_scoring.group_parameters
+# note: single-group (by_language) models have these fixed at mean 0 / var 1
+# by definition, so they are skipped
+Rscript registry/update_registry_group_params.R
+```
+
+```
 # sync table levante_metadata_scoring.item_parameters *to* Airtable
 Rscript registry/update_corpus_params.R
 ```

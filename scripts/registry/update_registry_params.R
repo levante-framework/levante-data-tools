@@ -1,6 +1,10 @@
 library(tidyverse)
 library(glue)
 library(levantemodels)
+library(here)
+
+# shared task_code -> task_label/task_category mapping
+source(here("..", "levante-data-meta", "task_info.R"))
 
 scoring_dataset <- redivis$organization("levante")$dataset("levante_metadata_scoring:e97h")$get()
 
@@ -58,24 +62,6 @@ item_metadata <- corpus |>
   select(item_uid_join = item_uid, item_group = group,
          item_entry = entry, item_group_label = group_label)
   
-task_info <- dplyr::tribble(
-  ~task_code , ~task_label              , ~task_category,
-  "hf"       , "hearts & flowers"       , "executive function",
-  "sds"      , "same & different"       , "executive function",
-  "mg"       , "memory"                 , "executive function",
-  "math"     , "math"                   , "math",
-  "matrix"   , "pattern matching"       , "reasoning",
-  "mrot"     , "shape rotation"         , "spatial cognition",
-  "trog"     , "sentence understanding" , "language",
-  "vocab"    , "vocabulary"             , "language",
-  "tom"      , "stories"                , "social cognition",
-  "pa"       , "language sounds"        , "reading",
-  "sre"      , "sentence reading"       , "reading",
-  "swr"      , "word reading"           , "reading",
-) |>
-  mutate(task_label = task_label |> stringr::str_to_title() |> forcats::fct_inorder(),
-         task_category = task_category |> stringr::str_to_title() |> forcats::fct_inorder())
-
 item_parameters <- scoring_params_tbl |>
   # rename(n_factors = nfact, model_registry = redivis_source) |>
   mutate(item_uid_join = item_uid |>
