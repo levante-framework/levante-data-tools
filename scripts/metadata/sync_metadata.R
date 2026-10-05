@@ -21,12 +21,13 @@ fetch_metadata <- \(src_base, src_table) {
   records <- fetch_airtable(src_base = src_base, src_table = src_table, export_fields = export_fields)
   
   # empty airtable cells come through as NA, or as the strings "NA"/"NULL" when
-  # the field is a list column that gets coerced with as.character(); normalize
-  # all of them to NA, which redivis serializes as null and treats as "unset"
+  # the field is a list column that gets coerced with as.character(); redivis
+  # rejects a json null for these properties, but removes the property when
+  # given an empty string
   df <- records |>
     arrange(name) |>
-    mutate(across(c(label, description),
-                  \(s) if_else(s %in% c("NA", "NULL"), NA_character_, s)))
+    mutate(across(c(label, description), \(s) if_else(s %in% c("NA", "NULL"), "", s))) |>
+    mutate(across(everything(), \(s) replace_na(s, "")))
   
   # restructure tibble into nested list
   df |> as.list() |> list_transpose() |> map(as.list)
