@@ -48,7 +48,9 @@ sync_dataset <- \(ds_name, metadata, log_file) {
   
   # compare set of airtable variable names against dataset variable names
   ds_var_names <- ds_var |> map(\(v) v$name) |> unlist() |> unique()
-  md_survey <- metadata |> keep(\(d) all(d$tables == "surveys"))
+  # a variable with no tables assigned satisfies all() vacuously, so require a
+  # non-empty value here -- otherwise it is silently exempted from the warnings
+  md_survey <- metadata |> keep(\(d) length(d$tables) > 0 && all(d$tables == "surveys"))
   md_survey_names <- unlist(transpose(md_survey)$name)
   md_var_names <- unlist(transpose(metadata)$name)
   missing_vars <- setdiff(ds_var_names, md_var_names)
