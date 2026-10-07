@@ -26,8 +26,8 @@ fetch_metadata <- \(src_base, src_table) {
   # given an empty string
   df <- records |>
     arrange(name) |>
-    mutate(across(c(label, description), \(s) if_else(s %in% c("NA", "NULL"), "", s))) |>
-    mutate(across(everything(), \(s) replace_na(s, "")))
+    mutate(across(c(label, description),
+                  \(s) if_else(is.na(s) | s %in% c("NA", "NULL"), "", s)))
   
   # restructure tibble into nested list
   df |> as.list() |> list_transpose() |> map(as.list)
