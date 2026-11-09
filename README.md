@@ -34,9 +34,14 @@ Redivis table. The specific set of possible sync operations is defined in
 - `fields_sort`: (optional) List of field(s) to sort output by
 - `fields_unnest`: (optional) List of field(s) to unnest (e.g. fields that are
                    multiselects in Airtable and each selection value should get
-                   its own row in Redivis)
+                   its own row in Redivis); records where the field is empty
+                   are kept, with the field as NA
 - `fields_jsonify`: (optional) List of field(s) to jsonify (e.g. fields that are
                     rollups in Airtable and should by stored as JSON in Redivis)
+- `field_tom_story`: (optional) Field holding a story number to insert into
+                     theory of mind item UIDs (`tom_{group}_{entry}` becomes
+                     `tom_story{story}_{group}_{entry}`); the field itself is
+                     not exported
 
 The script includes a rudimentary command line interface -- the first argument
 (required) is the name of one of the defined sync operations, and the second

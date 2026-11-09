@@ -35,11 +35,17 @@
   src_table: tblikKoQsqJx4uTtI # exclusion
   export_fields:
     - "item_uid"
+    - "story"
     - "dataset"
+    - "language"
+    - "start_date"
+    - "end_date"
+    - "reason"
   target_dataset: levante.levante_metadata_items:czjv
   target_table: exclusions:0b5t
   fields_sort: item_uid
-  fields_unnest: dataset
+  fields_unnest: ["dataset", "language"]
+  field_tom_story: story
 
 - name: survey_items
   src_base: appe2p0S3xk4DL2qc # LEVANTE item banks
