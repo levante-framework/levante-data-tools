@@ -24,8 +24,9 @@ scoring_mods <- scoring_files |>
   map(\(mod_filename) get_registry_file(mod_filename, registry_dir))
 
 mod_coefs <- \(mod_rec, item_sep = "-") {
-  n_resp <- colSums(!is.na(mod_rec@data)) |>
-    enframe(name = "item", value = "n_responses")
+  n_resp <- response_counts(mod_rec) |>
+    group_by(item) |>
+    summarise(n_responses = sum(n_responses))
   levantemodels:::model_vals(mod_rec) |>
     as_tibble() |>
     filter(group != "GROUP", item != "GROUP") |>
@@ -39,7 +40,7 @@ mod_coefs <- \(mod_rec, item_sep = "-") {
     distinct() |>
     mutate(difficulty = -d / a1) |>
     arrange(difficulty) |>
-    mutate(model_n_runs = length(mod_rec@runs))
+    mutate(model_n_runs = sum(run_counts(mod_rec)$n_runs))
 }
 
 scoring_params <- map(scoring_mods, mod_coefs)
