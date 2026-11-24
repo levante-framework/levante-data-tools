@@ -7,7 +7,8 @@ registry_dataset <- redivis$organization("levante")$dataset("levante-metadata-sc
 registry_dataset <- registry_dataset$create_next_version(if_not_exists = TRUE)
 registry_table <- registry_dataset$table("model_registry:rqwv")
 
-regdir <- "../levante-pilots/02_scoring_outputs/model_registry" # in levante-pilots
+# sanitized model records, without calibration data: run sanitize_registry.R first
+regdir <- "../levante-pilots/02_scoring_outputs/model_registry_sanitized" # in levante-pilots
 regfiles <- list(name = list.files(regdir, recursive = TRUE),
                  path = list.files(regdir, recursive = TRUE, full.names = TRUE)) |>
   transpose() |>

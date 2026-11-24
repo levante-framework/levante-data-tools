@@ -32,12 +32,11 @@ mod_group_coefs <- \(mod_rec) {
   if (model_class(mod_rec) != "MultipleGroupClass") return(NULL)
   stopifnot(mod_rec@nfact == 1)
 
-  n_runs <- tibble(group = mod_rec@groups) |> count(group, name = "n_runs")
+  n_runs <- run_counts(mod_rec)
 
-  n_resp <- bind_cols(group = mod_rec@groups, mod_rec@data) |>
-    pivot_longer(cols = -group, names_to = "item", values_to = "correct") |>
-    filter(!is.na(correct)) |>
-    count(group, name = "n_responses")
+  n_resp <- response_counts(mod_rec) |>
+    group_by(group) |>
+    summarise(n_responses = sum(n_responses))
 
   model_vals(mod_rec) |>
     as_tibble() |>
@@ -53,7 +52,7 @@ mod_group_coefs <- \(mod_rec) {
     left_join(n_runs, by = "group") |>
     left_join(n_resp, by = "group") |>
     arrange(group_mean) |>
-    mutate(model_n_runs = length(mod_rec@runs))
+    mutate(model_n_runs = sum(run_counts(mod_rec)$n_runs))
 }
 
 scoring_group_params <- map(scoring_mods, mod_group_coefs)
